@@ -21,14 +21,36 @@ class BaseUrlInterceptor : Interceptor {
                     newBaseUrl = oldHttpUrl
                 }
 
-                val newFullUrl = 
+                val newFullUrl = getNewHttpUrl(oldHttpUrl, newBaseUrl!!, true)
+                return chain.proceed(builder.url(newFullUrl).build())
+            } else {
+                val newHttpUrl = getNewHttpUrl(oldHttpUrl, oldHttpUrl, false)
+                return chain.proceed(builder.url(newHttpUrl).build())
             }
         } else {
-
+            val newBaseUrl = HttpUrl.parse(oldHttpUrl.toString())
+            val newHttpUrl = getNewHttpUrl(oldHttpUrl, newBaseUrl!!, false)
+            return chain.proceed(builder.url(newHttpUrl).build())
         }
     }
 
-    private fun getNewHttpUrl(oldHttpUrl: HttpUrl, newBaseUrl: HttpUrl, isOffline: Boolean) : HttpUrl {
+    private fun getNewHttpUrl(oldHttpUrl: HttpUrl, newBaseUrl: HttpUrl, isOfflineLine: Boolean) : HttpUrl {
+        val builder = oldHttpUrl.newBuilder()
+        val httpUrlBuild = builder
+            .scheme(newBaseUrl.scheme()) // 更改网络协议
+            .host(newBaseUrl.host()) // 更换主机名
+            .port(newBaseUrl.port()) // 更换端口
 
+        val segmentList = oldHttpUrl.encodedPathSegments()
+        if (isOfflineLine) {
+            httpUrlBuild.setEncodedPathSegment(0, "eiserver")
+                .setEncodedPathSegment(1, "client")
+                .addEncodedPathSegment("pad")
+                .addEncodedPathSegment(segmentList.get(1))
+        } else {
+            httpUrlBuild.setEncodedPathSegment(1, "faceRecognition")
+                .addEncodedPathSegment(segmentList.get(1))
+        }
+        return httpUrlBuild.build()
     }
 }

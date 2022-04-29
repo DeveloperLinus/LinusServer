@@ -1,6 +1,7 @@
 package com.linus.client
 
 import com.linus.client.interceptor.BaseUrlInterceptor
+import com.linus.client.interceptor.RequestEncryptInterceptor
 import okhttp3.OkHttpClient
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -13,6 +14,7 @@ object OkHttpTimeOutHolder {
         if (OK_HTTP_CLIENT == null) {
             val builder = OkHttpClient.Builder()
                 .addInterceptor(BaseUrlInterceptor())
+                .addInterceptor(RequestEncryptInterceptor())
                 .retryOnConnectionFailure(true)
                 .connectTimeout(timeOut, timeUnit)
                 .writeTimeout(timeOut, timeUnit)
